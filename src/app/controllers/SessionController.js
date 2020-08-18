@@ -6,9 +6,21 @@ import authConfig from '../../config/auth';
 
 class SessionController {
   async store(req, res) {
+    const schema = Yup.object().shape({
+      email: Yup.string().email().required(),
+      password: Yup.string().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
     const { email, password } = req.body;
     const trx = await connection.transaction();
 
+    /**
+     * Checks if the user is registered in the database
+     */
     const userExists = await trx('users')
       .select('users.*')
       .where('email', email);
@@ -17,6 +29,9 @@ class SessionController {
       return res.status(401).json({ error: 'User not found' });
     }
 
+    /**
+     * Checks if the password is the same as the encrypted password in the database
+     */
     const checkPassword = (password) => {
       return bcrypt.compare(password, userExists[0].password);
     };

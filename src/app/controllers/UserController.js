@@ -54,7 +54,73 @@ class UserController {
     });
   }
 
-  async update(req, res) {}
+  async update(req, res) {
+    // const schema = Yup.object().shape({
+    //   name: Yup.string(),
+    //   email: Yup.string().email(),
+    //   oldPassword: Yup.string().min(6),
+    //   password: Yup.string()
+    //     .min(6)
+    //     .when('oldPassword', (oldPassword, field) =>
+    //       oldPassword ? field.required() : field
+    //     ),
+    //   confirmPassword: Yup.string().when('password', (password, field) =>
+    //     password ? field.required().oneOf([Yup.ref('password')]) : field
+    //   ),
+    // });
+
+    // if (!(await schema.isValid(req.body))) {
+    //   return res.status(400).json({ error: 'Validation failed' });
+    // }
+
+    const { name, email, oldPassword, password } = req.body;
+    const trx = await connection.transaction();
+    /**
+     * Checks if the user is registered in the database and if the desired email is already in use
+     */
+    const users = await trx('users').select('users.*');
+    const userExists = users.filter((user) => user.id === req.userId);
+    const emailExists = users.filter((user) => user.email === email);
+
+    if (emailExists.length > 0) {
+      if (emailExists[0].email === email) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+    }
+
+    /**
+     * Checks if the old password informed is the same as the one stored in the database
+     */
+    const checkPassword = (password) => {
+      return bcrypt.compare(password, userExists[0].password);
+    };
+
+    if (oldPassword && !(await checkPassword(oldPassword))) {
+      return res.status(401).json({ error: 'Password does not match' });
+    }
+
+    /**
+     * If the user is trying to change the password, encrypts it, else it reuses the same password stored in the database
+     */
+    const hashedPassword = password
+      ? await bcrypt.hash(password, 8)
+      : userExists[0].password;
+
+    const user = {
+      name: name || userExists[0].name,
+      email: email || userExists[0].email,
+      password: hashedPassword,
+    };
+
+    const updated = await trx('users').update(user).where('id', req.userId);
+
+    await trx.commit();
+
+    return res.json({
+      id: req.userId,
+      ...user,
+    });
+  }
 }
 
 export default new UserController();
