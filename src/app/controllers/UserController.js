@@ -124,6 +124,14 @@ class UserController {
   }
 
   async delete(req, res) {
+    const schema = Yup.object().shape({
+      password: Yup.string().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
     const { password } = req.body;
     const trx = await connection.transaction();
 
@@ -131,10 +139,9 @@ class UserController {
       .select('users.*')
       .where('id', req.userId);
 
-    if (!password) {
-      return res.status(401).json({ error: 'Password is required' });
-    }
-
+    /**
+     * Checks if the password confirmation is the same as the one stored in the database
+     */
     const checkPassword = (password) => {
       return bcrypt.compare(password, userExists[0].password);
     };
