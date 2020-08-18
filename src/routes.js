@@ -10,5 +10,6 @@ routes.post('/signin', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 routes.put('/users', authMiddleware, UserController.update);
+routes.delete('/users', authMiddleware, UserController.delete);
 
 export default routes;

@@ -110,6 +110,7 @@ class UserController {
       name: name || userExists[0].name,
       email: email || userExists[0].email,
       password: hashedPassword,
+      updated_at: new Date(),
     };
 
     const updated = await trx('users').update(user).where('id', req.userId);
@@ -119,6 +120,35 @@ class UserController {
     return res.json({
       id: req.userId,
       ...user,
+    });
+  }
+
+  async delete(req, res) {
+    const { password } = req.body;
+    const trx = await connection.transaction();
+
+    const userExists = await trx('users')
+      .select('users.*')
+      .where('id', req.userId);
+
+    if (!password) {
+      return res.status(401).json({ error: 'Password is required' });
+    }
+
+    const checkPassword = (password) => {
+      return bcrypt.compare(password, userExists[0].password);
+    };
+
+    if (password && !(await checkPassword(password))) {
+      return res.status(401).json({ error: 'Password does not match' });
+    }
+
+    const deleted = await trx('users').del().where('id', req.userId);
+
+    trx.commit();
+
+    return res.json({
+      ...userExists[0],
     });
   }
 }
