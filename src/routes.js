@@ -11,6 +11,8 @@ routes.post('/signin', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 routes.use(authMiddleware);
+routes.get('/users', UserController.listAll);
+routes.get('/users/:id', UserController.listOne);
 routes.put('/users', UserController.update);
 routes.delete('/users', UserController.delete);
 routes.post('/trainningsession', TrainningSessionController.store);

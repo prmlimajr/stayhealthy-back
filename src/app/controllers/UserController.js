@@ -164,6 +164,30 @@ class UserController {
       ...userExists[0],
     });
   }
+
+  async listAll(req, res) {
+    const usersList = await connection('users').select('users.*');
+
+    if (usersList.length === 0) {
+      return res.status(401).json({ error: 'Empty list.' });
+    }
+
+    return res.json({ ...usersList });
+  }
+
+  async listOne(req, res) {
+    const userId = req.params.id;
+
+    const user = await connection('users')
+      .select('users.*')
+      .where('users.id', userId);
+
+    if (user.length === 0) {
+      return res.status(401).json({ error: 'User not found.' });
+    }
+
+    return res.json({ ...user[0] });
+  }
 }
 
 export default new UserController();
