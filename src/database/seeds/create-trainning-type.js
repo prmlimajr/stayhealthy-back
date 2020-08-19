@@ -5,9 +5,9 @@ exports.seed = function (knex) {
     .then(function () {
       // Inserts seed entries
       return knex('trainning_type').insert([
-        { type: 'A', description: 'Ombro/Peitoral/Tríceps' },
-        { type: 'B', description: 'Bíceps/Dorsais/Trapézio' },
-        { type: 'C', description: 'Glúteos/Perna' },
+        { type: 'A', description: 'Ombro / Peitoral / Tríceps' },
+        { type: 'B', description: 'Bíceps / Dorsais / Trapézio' },
+        { type: 'C', description: 'Glúteos / Perna' },
       ]);
     });
 };
