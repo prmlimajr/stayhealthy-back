@@ -16,5 +16,6 @@ routes.get('/users/:id', UserController.listOne);
 routes.put('/users', UserController.update);
 routes.delete('/users', UserController.delete);
 routes.post('/trainningsession', TrainningSessionController.store);
+routes.put('/trainningsession', TrainningSessionController.update);
 
 export default routes;
