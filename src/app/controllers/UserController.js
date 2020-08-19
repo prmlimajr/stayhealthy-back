@@ -102,6 +102,12 @@ class UserController {
     /**
      * If the user is trying to change the password, encrypts it, else it reuses the same password stored in the database
      */
+    if (password && !oldPassword) {
+      return res
+        .status(401)
+        .json({ error: 'Current password must be provided' });
+    }
+
     const hashedPassword = password
       ? await bcrypt.hash(password, 8)
       : userExists[0].password;
