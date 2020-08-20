@@ -20,5 +20,6 @@ routes.get('/trainningsession', TrainningSessionController.listAll);
 routes.get('/trainningsession/type', TrainningSessionController.listByType);
 routes.post('/trainningsession', TrainningSessionController.store);
 routes.put('/trainningsession', TrainningSessionController.update);
+routes.delete('/trainningsession', TrainningSessionController.delete);
 
 export default routes;

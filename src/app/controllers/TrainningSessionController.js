@@ -142,6 +142,32 @@ class TrainningSessionController {
 
     return res.json({ ...exercisesList });
   }
+
+  async delete(req, res) {
+    const schema = Yup.object().shape({
+      trainning_type_id: Yup.number().positive().max(3).required(),
+      exercise: Yup.string().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
+    const { trainning_type_id, exercise } = req.body;
+    const exerciseExists = await connection('trainning_session')
+      .select('trainning_session.*')
+      .where({ user_id: req.userId, trainning_type_id, exercise });
+
+    if (exerciseExists.length === 0) {
+      return res.status(401).json({ error: 'Empty list' });
+    }
+
+    const deleted = await connection('trainning_session')
+      .del()
+      .where({ user_id: req.userId, trainning_type_id, exercise });
+
+    return res.json({ ...exerciseExists[0] });
+  }
 }
 
 export default new TrainningSessionController();
