@@ -36,7 +36,37 @@ class SleepController {
   }
 
   async update(req, res) {
+    const schema = Yup.object().shape({
+      hours: Yup.number().positive().required(),
+      day: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
     const { hours, day } = req.body;
+
+    const sleepExists = await connection('sleep')
+      .select('sleep.*')
+      .where('day', day);
+
+    if (sleepExists.length === 0) {
+      return res.status(401).json({ error: 'No sleep time found' });
+    }
+
+    const sleep = {
+      user_id: req.userId,
+      hours,
+      day,
+      updated_at: new Date(),
+    };
+
+    const updated = await connection('sleep').update(sleep).where('day', day);
+
+    return res.json({
+      ...sleep,
+    });
   }
 }
 
