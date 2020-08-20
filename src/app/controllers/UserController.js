@@ -55,25 +55,25 @@ class UserController {
   }
 
   async update(req, res) {
-    // const schema = Yup.object().shape({
-    //   name: Yup.string(),
-    //   email: Yup.string().email(),
-    //   oldPassword: Yup.string().min(6),
-    //   password: Yup.string()
-    //     .min(6)
-    //     .when('oldPassword', (oldPassword, field) =>
-    //       oldPassword ? field.required() : field
-    //     ),
-    //   confirmPassword: Yup.string().when('password', (password, field) =>
-    //     password ? field.required().oneOf([Yup.ref('password')]) : field
-    //   ),
-    // });
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      oldPassword: Yup.string().min(6),
+      password: Yup.string()
+        .min(6)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      confirmPassword: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
+    });
 
-    // if (!(await schema.isValid(req.body))) {
-    //   return res.status(400).json({ error: 'Validation failed' });
-    // }
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
 
-    const { name, email, oldPassword, password } = req.body;
+    const { name, email, oldPassword, password, confirmPassword } = req.body;
     const trx = await connection.transaction();
     /**
      * Checks if the user is registered in the database and if the desired email is already in use
@@ -106,6 +106,13 @@ class UserController {
       return res
         .status(401)
         .json({ error: 'Current password must be provided' });
+    }
+
+    /**
+     * If the user try to change password it should be double checked
+     */
+    if (password && oldPassword && !confirmPassword) {
+      return res.status(401).json({ error: 'New password must be confirmed' });
     }
 
     const hashedPassword = password
