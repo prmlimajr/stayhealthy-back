@@ -108,6 +108,40 @@ class TrainningSessionController {
 
     return res.json(newExercise);
   }
+
+  async listAll(req, res) {
+    const exercisesList = await connection('trainning_session')
+      .select('trainning_session.*')
+      .where('user_id', req.userId);
+
+    if (exercisesList.length === 0) {
+      return res.status(401).json({ error: 'Empty list ' });
+    }
+
+    return res.json({ ...exercisesList });
+  }
+
+  async listByType(req, res) {
+    const schema = Yup.object().shape({
+      trainning_type_id: Yup.number().positive().max(3).required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
+    const { trainning_type_id } = req.body;
+
+    const exercisesList = await connection('trainning_session')
+      .select('trainning_session.*')
+      .where({ user_id: req.userId, trainning_type_id });
+
+    if (exercisesList.length === 0) {
+      return res.status(401).json({ error: 'Empty list' });
+    }
+
+    return res.json({ ...exercisesList });
+  }
 }
 
 export default new TrainningSessionController();
