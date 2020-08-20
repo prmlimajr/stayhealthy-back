@@ -2,6 +2,7 @@ import { Router } from 'express';
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import TrainningSessionController from './app/controllers/TrainningSessionController';
+import SleepController from './app/controllers/SleepController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -21,5 +22,7 @@ routes.get('/trainningsession/type', TrainningSessionController.listByType);
 routes.post('/trainningsession', TrainningSessionController.store);
 routes.put('/trainningsession', TrainningSessionController.update);
 routes.delete('/trainningsession', TrainningSessionController.delete);
+
+routes.post('/sleep', SleepController.store);
 
 export default routes;
