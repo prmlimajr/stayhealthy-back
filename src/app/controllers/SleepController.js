@@ -16,7 +16,7 @@ class SleepController {
 
     const sleepExists = await connection('sleep')
       .select('sleep.*')
-      .where('day', day);
+      .where({ user_id: req.userId, day });
 
     const sleptToday =
       sleepExists.length > 0 ? Number(sleepExists[0].hours) + hours : hours;
@@ -29,7 +29,9 @@ class SleepController {
 
     const insertedSleep =
       sleepExists.length > 0
-        ? await connection('sleep').update(sleep).where('day', day)
+        ? await connection('sleep')
+            .update(sleep)
+            .where({ user_id: req.userId, day })
         : await connection('sleep').insert(sleep);
 
     return res.json({ ...sleep });
@@ -49,7 +51,7 @@ class SleepController {
 
     const sleepExists = await connection('sleep')
       .select('sleep.*')
-      .where('day', day);
+      .where({ user_id: req.userId, day });
 
     if (sleepExists.length === 0) {
       return res.status(401).json({ error: 'No sleep time found' });
@@ -67,6 +69,31 @@ class SleepController {
     return res.json({
       ...sleep,
     });
+  }
+
+  async delete(req, res) {
+    const schema = Yup.object().shape({
+      day: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
+    const { day } = req.body;
+    const sleepExists = await connection('sleep')
+      .select('sleep.*')
+      .where({ user_id: req.userId, day });
+
+    if (sleepExists.length === 0) {
+      return res.status(401).json({ error: 'No sleep time found' });
+    }
+
+    const deleted = await connection('sleep')
+      .del()
+      .where({ user_id: req.userId, day });
+
+    return res.json({ ...sleepExists[0] });
   }
 }
 
