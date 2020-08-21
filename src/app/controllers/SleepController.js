@@ -95,6 +95,39 @@ class SleepController {
 
     return res.json({ ...sleepExists[0] });
   }
+
+  async listUserHistory(req, res) {
+    const sleepList = await connection('sleep')
+      .select('sleep.*')
+      .where({ user_id: req.userId });
+
+    if (sleepList.length === 0) {
+      return res.status(401).json({ error: 'Empty list' });
+    }
+
+    return res.json({ ...sleepList });
+  }
+
+  async listByDate(req, res) {
+    const schema = Yup.object().shape({
+      day: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation failed' });
+    }
+
+    const { day } = req.body;
+    const sleepExists = await connection('sleep')
+      .select('sleep.*')
+      .where({ user_id: req.userId, day });
+
+    if (sleepExists.length === 0) {
+      return res.status(401).json({ error: 'Empty list' });
+    }
+
+    return res.json({ ...sleepExists });
+  }
 }
 
 export default new SleepController();

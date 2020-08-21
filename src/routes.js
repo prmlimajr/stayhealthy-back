@@ -26,5 +26,7 @@ routes.delete('/trainningsession', TrainningSessionController.delete);
 routes.post('/sleep', SleepController.store);
 routes.put('/sleep', SleepController.update);
 routes.delete('/sleep', SleepController.delete);
+routes.get('/sleep/history', SleepController.listUserHistory);
+routes.get('/sleep', SleepController.listByDate);
 
 export default routes;
