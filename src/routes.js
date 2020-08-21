@@ -4,6 +4,7 @@ import SessionController from './app/controllers/SessionController';
 import TrainningSessionController from './app/controllers/TrainningSessionController';
 import SleepController from './app/controllers/SleepController';
 import WeightController from './app/controllers/WeightController';
+import RunningSessionController from './app/controllers/RunningSessionController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -32,5 +33,8 @@ routes.get('/sleep', SleepController.listByDate);
 
 routes.post('/weight', WeightController.store);
 routes.get('/weight/history', WeightController.listUserHistory);
+
+routes.post('/run', RunningSessionController.store);
+routes.put('/run', RunningSessionController.update);
 
 export default routes;
